@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="3.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid Name="Box" GridType="Uniform">
+      <Topology TopologyType="Tetrahedron_10" NumberOfElements="4537" NodesPerElement="10">
+        <DataItem Dimensions="4537 10" NumberType="Int" Format="HDF">deformation.h5:/Mesh/Box/topology</DataItem>
+      </Topology>
+      <Geometry GeometryType="XYZ">
+        <DataItem Dimensions="8566 3" Format="HDF">deformation.h5:/Mesh/Box/geometry</DataItem>
+      </Geometry>
+    </Grid>
+  </Domain>
+</Xdmf>
