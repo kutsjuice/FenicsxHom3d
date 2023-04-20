@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="3.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid Name="Box" GridType="Uniform">
+      <Topology TopologyType="Hexahedron_27" NumberOfElements="392" NodesPerElement="27">
+        <DataItem Dimensions="392 27" NumberType="Int" Format="HDF">mesh.h5:/Mesh/Box/topology</DataItem>
+      </Topology>
+      <Geometry GeometryType="XYZ">
+        <DataItem Dimensions="3729 3" Format="HDF">mesh.h5:/Mesh/Box/geometry</DataItem>
+      </Geometry>
+    </Grid>
+    <Grid Name="Box_cells" GridType="Uniform">
+      <xi:include xpointer="xpointer(/Xdmf/Domain/Grid/Geometry)" />
+      <Topology TopologyType="Hexahedron_27" NumberOfElements="392" NodesPerElement="27">
+        <DataItem Dimensions="392 27" NumberType="Int" Format="HDF">mesh.h5:/MeshTags/Box_cells/topology</DataItem>
+      </Topology>
+      <Attribute Name="Box_cells" AttributeType="Scalar" Center="Cell">
+        <DataItem Dimensions="392 1" Format="HDF">mesh.h5:/MeshTags/Box_cells/Values</DataItem>
+      </Attribute>
+    </Grid>
+    <Grid Name="Box_facets" GridType="Uniform">
+      <xi:include xpointer="xpointer(/Xdmf/Domain/Grid/Geometry)" />
+      <Topology TopologyType="Quadrilateral_9" NumberOfElements="0" NodesPerElement="9">
+        <DataItem Dimensions="0 9" NumberType="Int" Format="HDF">mesh.h5:/MeshTags/Box_facets/topology</DataItem>
+      </Topology>
+      <Attribute Name="Box_facets" AttributeType="Scalar" Center="Cell">
+        <DataItem Dimensions="0 1" Format="HDF">mesh.h5:/MeshTags/Box_facets/Values</DataItem>
+      </Attribute>
+    </Grid>
+  </Domain>
+</Xdmf>
