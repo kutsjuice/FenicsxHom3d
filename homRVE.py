@@ -13,8 +13,8 @@ import sys;
 
 D_TYPE = PETSc.ScalarType
 
-ν = 0.3
-E = 2.1e10
+ν = 0.43
+E = 1.8e9
 
 λ = ν*E/(1+ν)/(1-2*ν)
 μ = E/2/(1+ν)
@@ -167,18 +167,18 @@ def main():
 
 
     # Create a DOLFINx mesh (same mesh on each rank)
-    msh, cell_markers, facet_markers = gmshio.model_to_mesh(model, MPI.COMM_SELF,0)
+    msh, cell_markers, facet_markers = gmshio.model_to_mesh(model, MPI.COMM_WORLD,0)
     msh.name = "Box"
     cell_markers.name = f"{msh.name}_cells"
     facet_markers.name = f"{msh.name}_facets"
 
     # Finalize gmsh to be able to use it again
     gmsh.finalize()
-    with io.XDMFFile(msh.comm, "out/imported_mesh.xdmf", "w") as file:
-        file.write_mesh(msh)
-        file.write_meshtags(cell_markers)
-        msh.topology.create_connectivity(msh.topology.dim - 1, msh.topology.dim)
-        file.write_meshtags(facet_markers)
+    # with io.XDMFFile(msh.comm, "out/imported_mesh.xdmf", "w") as file:
+    #     file.write_mesh(msh)
+    #     file.write_meshtags(cell_markers)
+    #     msh.topology.create_connectivity(msh.topology.dim - 1, msh.topology.dim)
+    #     file.write_meshtags(facet_markers)
         
 
 
@@ -263,8 +263,8 @@ def main():
     
     # set solver options
     opts = PETSc.Options();
-    opts["ksp_type"] = "gmres";
-    opts["ksp_rtol"] = 1.0e-3;
+    opts["ksp_type"] = "cg";
+    opts["ksp_rtol"] = 1.0e-7;
     opts["pc_type"] = "gamg"; # geometric algebraic multigrid preconditioner
 
     # Use Chebyshev smothing for multigrid
@@ -321,8 +321,9 @@ def main():
                 m_ε[indexVoigt(i, j), k] = ϵ_i;
                 print("ε{} = {}; σ{} = {} ".format(case, ϵ_i, case, σ_i));
     
-    np.savetxt("epsilon.txt", m_ε, delimiter = ", ")
-    np.savetxt("sigma.txt", m_σ, delimeter = ", ");    
+    
+    np.savetxt("out/"+sys.argv[1], np.vstack((m_ε,m_σ)) , delimiter = ", ")
+    # np.savetxt("out/", m_σ, delimiter = ", ");    
     
     
     
