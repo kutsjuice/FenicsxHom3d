@@ -347,5 +347,4 @@ def main():
     
 
 if __name__=="__main__":
-    # print("MPI.COMM_SELF====",MPI.COMM_SELF)
     main();
