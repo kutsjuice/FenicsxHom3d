@@ -11,6 +11,7 @@ import gmsh;
 
 import sys;
 
+print("RUNNING: ", "in/"+sys.argv[1])
 D_TYPE = PETSc.ScalarType
 
 ν = 0.43
@@ -148,7 +149,7 @@ def main():
     # Generate the mesh
     # model.mesh.generate(2)
     # model.mesh.recombine()
-    model.mesh.generate(dim=3)
+    # model.mesh.generate(dim=3)
 
     bbox = [np.Inf,
             np.Inf,
@@ -167,13 +168,17 @@ def main():
 
 
     # Create a DOLFINx mesh (same mesh on each rank)
+    # print("MPI.COMM_SELF====",MPI.COMM_SELF)
     msh, cell_markers, facet_markers = gmshio.model_to_mesh(model, MPI.COMM_WORLD,0)
+    # msh, cell_markers, facet_markers = gmshio.read_from_msh("in/"+sys.argv[1], MPI.COMM_WORLD, 0, gdim=3)
     msh.name = "Box"
     cell_markers.name = f"{msh.name}_cells"
     facet_markers.name = f"{msh.name}_facets"
 
     # Finalize gmsh to be able to use it again
     gmsh.finalize()
+    print("MESH IMPORTED")
+    print("NUMBER OF NODES:", msh.geometry.x.shape[0])
     # with io.XDMFFile(msh.comm, "out/imported_mesh.xdmf", "w") as file:
     #     file.write_mesh(msh)
     #     file.write_meshtags(cell_markers)
@@ -252,17 +257,18 @@ def main():
                                 marked_facets[facets_order],
                                 markers[facets_order]);
 
-    ds = ufl.Measure('ds', domain=msh, subdomain_data=facets_tags);
+    ds = ufl.Measure('ds', domain=msh, subdomain_data=facets_tags, metadata={'quadrature_degree': ORDER});
     
     
     m_σ = np.zeros((6,6), dtype = np.float64);
     m_ε = np.zeros((6,6), dtype = np.float64);
     
-    dx = ufl.Measure('dx', domain=msh);
+    dx = ufl.Measure('dx', domain=msh, metadata={'quadrature_degree': ORDER});
     volume = fem.assemble_scalar(fem.form(fem.Constant(msh, PETSc.ScalarType(1.0)) * dx()));
     
     # set solver options
     opts = PETSc.Options();
+    # set gamg options
     opts["ksp_type"] = "cg";
     opts["ksp_rtol"] = 1.0e-7;
     opts["pc_type"] = "gamg"; # geometric algebraic multigrid preconditioner
@@ -274,14 +280,25 @@ def main():
     # Improve estimation of eigenvalues for Chebyshev smoothing
     opts["mg_levels_esteig_ksp_type"] = "cg";
     opts["mg_levels_ksp_chebyshev_esteig_steps"] = 20;
+    
+    # set hypre options
+#     opts["ksp_type"] = "cg";
+#     opts["ksp_rtol"] = 1.0e-7;
+#     opts["pc_type"] = "hypre"; # geometric algebraic multigrid preconditioner
 
+#     opts["pc_hypre_type"] = "boomeramg";
+#     opts["pc_hypre_boomeramg_max_iter"] = 1;
+#     opts["pc_hypre_boomeramg_cycle_type"] = "v";
+#     opts["pc_hypre_boomeramg_print_statistics"] = 1;
+
+    
     # Create PETSc Krylov solver and turn convergence monitoring on
     solver = PETSc.KSP().create(msh.comm);
     solver.setFromOptions();
     solver.setMonitor(lambda _, its, rnorm: print(f"Iteration: {its}, rel. residual: {rnorm}"));
     ns = build_nullspace(V);
     
-
+    print("SOLVER IS SET UP")
     for i in range(3):
         for j in range(i,3):
 
