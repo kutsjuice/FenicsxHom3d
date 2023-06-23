@@ -241,7 +241,7 @@ A.setNearNullSpace(ns);
 # set solver options
 opts = PETSc.Options();
 opts["ksp_type"] = "cg";
-opts["ksp_rtol"] = 1.0e-5;
+opts["ksp_rtol"] = 1.0e-7;
 opts["pc_type"] = "gamg"; # geometric algebraic multigrid preconditioner
 
 # Use Chebyshev smothing for multigrid
@@ -250,7 +250,7 @@ opts["mg_levels_pc_type"] = "jacobi";
 
 # Improve estimation of eigenvalues for Chebyshev smoothing
 opts["mg_levels_esteig_ksp_type"] = "cg";
-opts["mg_levels_ksp_chebyshev_esteig_steps"] = 20;
+opts["mg_levels_ksp_chebyshev_esteig_steps"] = 30;
 
 # Create PETSc Krylov solver and turn convergence monitoring on
 solver = PETSc.KSP().create(msh.comm)
