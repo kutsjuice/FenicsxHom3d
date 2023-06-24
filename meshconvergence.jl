@@ -1,10 +1,12 @@
 using PyPlot;
 using CSV, DataFrames
 using LinearAlgebra
+using Gmsh
+using LsqFit
 
 rcParams = PyPlot.PyDict(PyPlot.matplotlib."rcParams");
 rcParams["font.family"] = "Times New Roman";
-rcParams["text.usetex"] = true;
+rcParams["text.usetex"] = false;
 
 # readdir("out")
 # files = [   "MESH_STEP=0.423_POROSITY=0.743_DIAM=0.2_REPNUM=2_00.msh",
@@ -52,6 +54,7 @@ files = [
 ]
 path = "out/Mesh_convergancy/"
 σ_err = Vector{Float64}(undef, length(files)-1)
+# linear = Vector{Fl}
 msh_size = similar(σ_err);
 # ε_norm = similar(σ_norm); C_norm = similar(σ_norm);
 
@@ -67,13 +70,35 @@ println("==============================");
 for i in eachindex(files[2:end])
     a = Matrix(CSV.read(path*files[1+i], DataFrame; header = false));
     global σ = a[7:end,:];
-    rex = r"(?<=MESHSIZE=)[0-9]*\.?[0-9]*e-3"
-    mch = match(rex, files[1+i]);
+    # rex = r"(?<=MESHSIZE=)[0-9]*\.?[0-9]*e-3"
+    # mch = match(rex, files[1+i]);
     # global ε = a[1:6,:];
     display(σ0 - σ)
     # C = σ*inv(ε)
     σ_err[i] = norm(σ0 - σ)/norm(σ0);
-    msh_size[i] = parse(Float64, mch.match)
+    
+    gmsh.initialize()
+    gmsh.open("in/convergence_mesh/"*files[1+i])
+    tags = gmsh.model.getEntities(3)
+    _, eltags, _ = gmsh.model.mesh.get_elements(3)
+
+
+    element = gmsh.model.mesh.get_element(eltags[1][1])
+
+
+    rex = r"(?<=POROSITY=)[0-9]*\.?[0-9]*"
+    mch = match(rex, files[1]);
+    prsty = parse(Float64, mch.match)
+    bound = gmsh.model.get_bounding_box(tags[1]...)
+    volume = 1;
+    for i in 1:3
+        volume *= (bound[i+3]-bound[i])
+    end
+    elnum = length(eltags[1])
+    average_el_volume = volume/elnum
+    average_el_size = average_el_volume^(1/3)
+    msh_size[i] = average_el_size;
+    gmsh.finalize()
     # ε_norm[i] = norm(ε);
     # C_norm[i] = norm(C);
 end
@@ -84,13 +109,23 @@ end
 # ε_norm[end] = norm(ε);
 # C_norm[end] = norm(C);
 
+@. eq1(x, p1) = p1[1]*x + p1[2]
 
-figure();plot(msh_size, σ_err, "k.-"); yscale("log"); xscale("log")
-xlabel("Element size, mm"); 
-ylabel("\${L_2(\\hat{C}-C)}/{L_2(\\hat{C})}\$");
-grid("minor"); grid("major")
-# figure();plot(2:2:2*length(σ_norm), ε_norm, "o-");#yscale("log");# xscale("log")
+p0 = [0.0, 0.0]
+fit = curve_fit(eq1, log.(msh_size), log.(σ_err), p0);
+p = fit.param
+@. eq2(x, p2) = p2[1]*x^p[1]
+p0 = [1000.0]
+fit = curve_fit(eq2, msh_size, σ_err, p0)
+p[2] = fit.param[1]
+begin
+    figure();plot(msh_size, σ_err, "k.-"); yscale("log"); xscale("log")
+    xlabel("Element size, mm"); 
+    ylabel("\${L_2(\\hat{C}-C)}/{L_2(\\hat{C})}\$");
+    grid("minor"); grid("major")
+    plot(msh_size, p[2]*msh_size.^[p[1]])
+    # plot(msh_size, msh_size)
+    # plot(msh_size, 5000*msh_size.^2.5)
+end
 
-# figure();plot(1:1:1*length(σ_norm), σ_norm, "o-");#yscale("log")
-# figure();plot(1:1:1*length(σ_norm), ε_norm, "o-");#yscale("log");# xscale("log")
-# figure(); plot(C_norm);yscale("log")
+fit.param
