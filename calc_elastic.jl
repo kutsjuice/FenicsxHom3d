@@ -17,7 +17,6 @@ files025 = [
     "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.0114_FILLNESS=0.834_00.msh",
     "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.01275_FILLNESS=0.666_00.msh",
     "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.0147_FILLNESS=0.5_00.msh",
-    # "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.01815_FILLNESS=0.333_00.msh",
     "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.018_FILLNESS=0.333_00.msh",
 ]
 files040 = [
@@ -29,12 +28,27 @@ files040 = [
     "MESH_STEP=0.05_POROSITY=0.7_DIAM=0.02045_FILLNESS=0.833_00.msh",
     "MESH_STEP=0.05_POROSITY=0.7_DIAM=0.02278_FILLNESS=0.667_00.msh",
     "MESH_STEP=0.05_POROSITY=0.7_DIAM=0.0262_FILLNESS=0.5_00.msh",
+    "MESH_STEP=0.05_POROSITY=0.8_DIAM=0.01515_FILLNESS=1.0_00.msh",
+    "MESH_STEP=0.05_POROSITY=0.8_DIAM=0.01515_FILLNESS=1.0_00.msh",
+    "MESH_STEP=0.05_POROSITY=0.8_DIAM=0.01655_FILLNESS=0.833_00.msh",
+    "MESH_STEP=0.05_POROSITY=0.8_DIAM=0.01845_FILLNESS=0.667_00.msh", 
+    "MESH_STEP=0.05_POROSITY=0.8_DIAM=0.0212_FILLNESS=0.5_00.msh",
+    "MESH_STEP=0.05_POROSITY=0.8_DIAM=0.0259_FILLNESS=0.333_00.msh", 
+    "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.01155_FILLNESS=0.833_00.msh",
+    "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.0129_FILLNESS=0.667_00.msh",
+    "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.01485_FILLNESS=0.5_00.msh",
+    "MESH_STEP=0.05_POROSITY=0.9_DIAM=0.01815_FILLNESS=0.333_00.msh",
 ]
 
 path = "out/meshes/";
 
-# porosities = [0.7, 0.8, 0.9];
-porosities = [0.6, 0.7];
+porosities = [
+    0.9, 
+    0.8, 
+    0.7,
+    0.6,
+    ];
+
 dirs = [
     [
         [1,1],
@@ -92,7 +106,7 @@ rcParams["text.usetex"] = true;
 k = 6;
 WIDTH_SIZE = 4
 HEIGHT_SIZE = 3
-linestyles = ["-", "--", "-."];
+linestyles = ["solid", "dashed", "dashdot", "dotted"];
 figure(figsize=(WIDTH_SIZE,HEIGHT_SIZE))
 iline = 0;
 for prsty in porosities
@@ -122,10 +136,21 @@ for prsty in porosities
     # plot(diam, val, marker="o", label="$prsty")
 end
 
-legend(["$prsty" for prsty in porosities])
+legend(["$prsty" for prsty in porosities], loc="upper left")
 grid("on");
+xlim([10,31]);
+xticks(10:5:31)
+
+yt_fisrt = 0;
+yt_last = 35;
+yt_step = 10;
+ylim([yt_fisrt, yt_last]);
+yticks(yt_fisrt:yt_step:yt_last)
+
+gca().minorticks_on()
 ylabel("\$C_$k\$, MPa");
-xlabel("Fiber diameter \$d_f\$, mkm");
+xlabel("Fiber diameter \$d_f\$, \$\\mathrm{\\mu}\$m");
 gca().get_legend().set_title("Porosity \$ \\phi \$:");
 tight_layout();
 savefig("C_$(k)_040.pdf")
+x = 0:0.1:10
