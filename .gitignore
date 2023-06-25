@@ -1,7 +1,9 @@
 .ipynb_checkpoints/
+.spyproject/
 *.pdf
 *.msh
 *.vtk
 in/
 out/
 temp.py
+Manifest.toml
