@@ -1,5 +1,9 @@
 import numpy as np;
 import ufl;
+from inspect import currentframe, getframeinfo
+
+cf = currentframe()
+filename = getframeinfo(cf).filename
 
 from mpi4py import MPI;
 from petsc4py import PETSc
@@ -133,7 +137,6 @@ def main():
     gmsh.option.setNumber("Mesh.SubdivisionAlgorithm", 0)
     ## Importing RVE geometry
     gmsh.open("in/"+sys.argv[1]);
-
     model = gmsh.model()
     # model.add("main_domain")
     model_name = model.getCurrent()
@@ -145,11 +148,10 @@ def main():
     # Synchronize OpenCascade representation with gmsh model
     model.occ.synchronize()
 
-
     # Generate the mesh
     # model.mesh.generate(2)
     # model.mesh.recombine()
-    # model.mesh.generate(dim=3)
+    model.mesh.generate(dim=3)
 
     bbox = [np.Inf,
             np.Inf,
@@ -174,7 +176,7 @@ def main():
     msh.name = "Box"
     cell_markers.name = f"{msh.name}_cells"
     facet_markers.name = f"{msh.name}_facets"
-
+    
     # Finalize gmsh to be able to use it again
     gmsh.finalize()
     print("MESH IMPORTED")
@@ -339,8 +341,8 @@ def main():
                 print("ε{} = {}; σ{} = {} ".format(case, ϵ_i, case, σ_i));
     
     
-    np.savetxt("out/"+sys.argv[1], np.vstack((m_ε,m_σ)) , delimiter = ", ")
-    # np.savetxt("out/", m_σ, delimiter = ", ");    
+    # np.savetxt("out/"+sys.argv[1], np.vstack((m_ε,m_σ)) , delimiter = ", ")
+    np.savetxt("out/"+sys.argv[1], m_σ, delimiter = ", ");    
     
     
     
