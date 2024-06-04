@@ -63,7 +63,7 @@ If this project was useful in your work, you can cite it as follows:
 ```tex
 @misc{kuts2023,
   author = {Kuts, M. S. and Walker, J. T.},
-  title = {Fibrous porous media homogenization},
+  title = {FenicsxHom3d},
   year = {2023},
   publisher = {GitHub},
   journal = {GitHub repository},
