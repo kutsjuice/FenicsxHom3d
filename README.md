@@ -1,4 +1,4 @@
-# Fibrous-porous-media-homogenization
+# FenicsxHom3d
 This project is dedicated to the homogenization of mechanical properties of fibrous media using FEniCSx.
 
 ## Functionality
